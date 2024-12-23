@@ -6,9 +6,10 @@ import (
 
 func TestMinifyJSON(t *testing.T) {
 	testCases := []struct {
-		name     string
-		input    string
-		expected string
+		name        string
+		input       string
+		expected    string
+		shouldError bool
 	}{
 		{
 			name: "simple object",
@@ -30,11 +31,23 @@ func TestMinifyJSON(t *testing.T) {
 			}`,
 			expected: `{"active":true,"person":{"age":30,"name":"John"}}`,
 		},
+		{
+			name:        "invalid JSON",
+			input:       `{"name": "John", "age": }`,
+			expected:    "",
+			shouldError: true,
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result, err := minifyJSON(tc.input)
+			if tc.shouldError {
+				if err == nil {
+					t.Error("expected error but got none")
+				}
+				return
+			}
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
